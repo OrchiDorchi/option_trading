@@ -26,8 +26,9 @@ def advice():
     last_day = data.loc[start_date:].index.to_list()[-1]
     options_data_daily = options_data.loc[last_day]
     spread = setup_call_spread(options_data_daily, 10)
-    spread['position'] = np.where(spread['position'] > 0, 'BUY', 'SELL')
+    spread['position'] = np.where(spread['position'] > 0, 'LONG', 'SHORT')
     spread['expiration'] = '30d'
+    spread = spread[['position','Option Type','Strike Price','premium','expiration']]
     return spx.loc[last_day]['Adj Close'],spread
 def setup_call_spread(options_data, strike_difference=10):
     if options_data is None:

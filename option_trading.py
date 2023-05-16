@@ -30,6 +30,12 @@ st.markdown("""
     div[data-baseweb] {border-radius: 4px;}
 </style>""",
 unsafe_allow_html=True)
+hide_table_row_index = """
+            <style>
+            thead tr th:first-child {display:none}
+            tbody th {display:none}
+            </style>
+            """
 with col1:
     take_profit = st.number_input('How much money are you willing to invest?(USD)',value=5000,format='%d')
 
@@ -41,13 +47,7 @@ min_roi = st.radio(
     ('5%', '10%', '15%','20%','30%','50%','100%','200%'),horizontal=True,index=3)
 col1, col2, col3, col4, col5 = st.columns(5)
 spread = None
-with col3:      
-    if st.button('Give Advice'):
-        last_close, spread = advice()
 
-if spread is not None:
-    st.write('Last days close is ${:.2f}'.format(last_close))
-    st.table(spread)
 
 # col1, col2, col3 = st.columns(3)
 # with col1:
@@ -62,8 +62,15 @@ col1, col2, col3, col4, col5 = st.columns(5)
 with col3:      
     if st.button('Run Backtest'):
         temp=True
+with col3:      
+    if st.button('Give Advice'):
+        last_close, spread = advice()
 
+if spread is not None:
+    st.write('Last days close is ${:.2f}'.format(last_close))
+    st.table(spread)
 if temp:
+    st.markdown(hide_table_row_index, unsafe_allow_html=True)
     analytics,round_trips_details,trades,trade_analytics = backtest()
 
 if analytics is not None:
