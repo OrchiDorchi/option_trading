@@ -5,11 +5,14 @@ import plotly.express as px
 import pickle
 from backtest import backtest
 from ml_options_util_quantra import advice
+
+st.set_page_config(page_title='Riskoptima Options', layout="centered")
 data = pd.read_csv('spx.csv')
 vot_soft = pickle.load(open('vot_soft.pickle', "rb"))
 
 data = data.set_index('Date')
-line_graph= px.line(data['Adj Close'],title='Daily close Price of SPY')
+data = data[:-1]
+line_graph= px.line(data['Adj Close'],title='Daily close Price of SPX')
 
 st.header('ML Model for Bull Call Spread Trading')
 
@@ -43,7 +46,7 @@ with col3:
         last_close, spread = advice()
 
 if spread is not None:
-    st.write(f'Last days close is ${last_close}')
+    st.write('Last days close is ${:.2f}'.format(last_close))
     st.table(spread)
 
 # col1, col2, col3 = st.columns(3)
