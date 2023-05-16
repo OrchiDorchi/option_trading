@@ -42,7 +42,7 @@ min_roi = st.radio(
 col1, col2, col3, col4, col5 = st.columns(5)
 spread = None
 with col3:      
-    if st.button('Advice'):
+    if st.button('Give Advice'):
         last_close, spread = advice()
 
 if spread is not None:
