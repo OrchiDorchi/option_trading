@@ -150,7 +150,7 @@ def backtest(initial_equity=5_000,max_loss=100):
     (round_trips_details['exit_price']-round_trips_details['entry_price'])
 
 
-    lot_size=1
+    lot_size=5
     trades = pd.DataFrame()
     trades_group = round_trips_details.groupby('entry_date')
     trades['Entry_Date'] = trades_group['entry_date'].first()
