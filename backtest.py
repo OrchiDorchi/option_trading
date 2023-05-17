@@ -185,6 +185,7 @@ def backtest(initial_equity=5_000,max_loss=25):
     round_trips_details['position'] = np.where(round_trips_details['position'] > 0, 'LONG', 'SHORT')
     round_trips_details['Size'] = lot_size
     round_trips_details = round_trips_details.set_index('position')
+    round_trips_details = round_trips_details[['Size','Option Type','Strike Price','entry_price','entry_date','exit_date','exit_price','pnl']]
     return analytics,round_trips_details,trades,trade_analytics
 if __name__ =='__main__':
     backtest()
