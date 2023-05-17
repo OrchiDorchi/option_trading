@@ -13,7 +13,6 @@ done_backtest = False
 analytics = None
 spread = None
 equity_graph = None
-
 data = pd.read_csv('spx.csv')
 vot_soft = pickle.load(open('vot_soft.pickle', "rb"))
 data = data.set_index('Date')
@@ -65,8 +64,7 @@ with col3:
         done_backtest=True
 with col3:      
     if st.button('Give Advice'):
-        max_loss = initial_equity * float(max_risk.strip('%')) / 100
-        last_close, spread = advice(max_loss)
+        last_close, spread = advice(initial_equity * float(max_risk.strip('%')) / 100)
 
 if spread is not None:
     st.write('Last days close is ${:.2f}'.format(last_close))
@@ -76,11 +74,11 @@ if spread is not None:
     st.subheader('Potential Profit Graph')
     visualize_options([call1,call2],spread.iloc[0]['Size'],3750,4000)
 if done_backtest:
-    analytics,round_trips_details,trades,trade_analytics = backtest()
+    analytics,round_trips_details,trades,trade_analytics = backtest(initial_equity,float(max_risk.strip('%')))
 
 if analytics is not None:
     analytics = analytics.rename(columns={"Cumulative PnL": "Equity"})
-    analytics_graph= px.line(analytics['Equity']+initial_equity,)
+    analytics_graph= px.line(analytics['Equity'],)
     # analytics.to_csv('analytics.csv')
     st.plotly_chart(analytics_graph)
     st.subheader('Backtesting Results')

@@ -17,7 +17,7 @@ def add_to_mtm(mark_to_market, option_strategy, trading_date):
     # print(mark_to_market)
     return mark_to_market
 
-def backtest(initial_equity=5_000,max_loss=100):
+def backtest(initial_equity=5_000,max_loss=25):
     options_data = pd.read_pickle(
     'spx_eom_expiry_options_2010_2022.bz2')
     options_data.columns = options_data.columns.str.replace(
@@ -135,6 +135,7 @@ def backtest(initial_equity=5_000,max_loss=100):
     mark_to_market['net_premium'] = mark_to_market.position * mark_to_market.premium
 
     # Strategy analytics
+    lot_size=int(initial_equity*max_loss/10000)
     analytics = pd.DataFrame()
     analytics['change_in_pnl'] = mark_to_market.groupby(
         'Date').net_premium.sum().diff()
@@ -143,6 +144,7 @@ def backtest(initial_equity=5_000,max_loss=100):
 
     # Calculate cumulative PnL
     analytics['Cumulative PnL'] = analytics['change_in_pnl'].cumsum()
+    analytics['Cumulative PnL'] = analytics['Cumulative PnL'] *lot_size +initial_equity
 
     completion_bar.empty()
 
@@ -150,7 +152,6 @@ def backtest(initial_equity=5_000,max_loss=100):
     (round_trips_details['exit_price']-round_trips_details['entry_price'])
 
 
-    lot_size=5
     trades = pd.DataFrame()
     trades_group = round_trips_details.groupby('entry_date')
     trades['Entry_Date'] = trades_group['entry_date'].first()
@@ -182,6 +183,7 @@ def backtest(initial_equity=5_000,max_loss=100):
     
     
     round_trips_details['position'] = np.where(round_trips_details['position'] > 0, 'LONG', 'SHORT')
+    round_trips_details['Size'] = lot_size
     round_trips_details = round_trips_details.set_index('position')
     return analytics,round_trips_details,trades,trade_analytics
 if __name__ =='__main__':
