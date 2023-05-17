@@ -57,8 +57,8 @@ def backtest():
                 continue
 
             if (spread.premium.isna().sum() > 0) or ((spread.premium == 0).sum() > 0):
-                print(
-                    f"\x1b[31mStrike price not liquid so we will ignore this trading opportunity {i}\x1b[0m")
+                # print(
+                #     f"\x1b[31mStrike price not liquid so we will ignore this trading opportunity {i}\x1b[0m")
                 continue
 
             trades = spread.copy()
@@ -78,10 +78,10 @@ def backtest():
             mark_to_market = add_to_mtm(mark_to_market, spread, i)
 
             trade_num += 1
-            print("-"*30)
+            # print("-"*30)
 
-            print(
-                f"Trade No: {trade_num} | Entry | Date: {i} | Premium: {net_premium*-1} | Position: {current_position}")
+            # print(
+            #     f"Trade No: {trade_num} | Entry | Date: {i} | Premium: {net_premium*-1} | Position: {current_position}")
 
         elif current_position != 0:
             try:
@@ -109,8 +109,8 @@ def backtest():
 
             if exit_flag:
                 if spread.premium.isna().sum() > 0:
-                    print(
-                        f"Data missing for the required strike prices on {i}, Not adding to trade logs.")
+                    # print(
+                    #     f"Data missing for the required strike prices on {i}, Not adding to trade logs.")
                     current_position = 0
                     continue
                 trades['exit_date'] = i
@@ -126,8 +126,8 @@ def backtest():
                 cum_pnl += trade_pnl
                 cum_pnl = round(cum_pnl, 1)
 
-                print(
-                    f"Trade No: {trade_num} | Exit Type: {exit_type} | Date: {i} | Premium: {net_premium} | PnL: {trade_pnl} | Cum PnL: {cum_pnl}")
+                # print(
+                #     f"Trade No: {trade_num} | Exit Type: {exit_type} | Date: {i} | Premium: {net_premium} | PnL: {trade_pnl} | Cum PnL: {cum_pnl}")
 
                 current_position = 0
                 exit_flag = False
@@ -179,5 +179,6 @@ def backtest():
         trades.loc[trades.PnL < 0].PnL.mean())
     trade_analytics['Profit Factor'] = (trade_analytics['Win_Percentage']*trade_analytics['per_trade_profit_winners']) / \
     (trade_analytics['Loss_Percentage']*trade_analytics['per_trade_loss_losers'])
-
+    round_trips_details['position'] = np.where(round_trips_details['position'] > 0, 'LONG', 'SHORT')
+    round_trips_details = round_trips_details.set_index('position')
     return analytics,round_trips_details,trades,trade_analytics

@@ -14,7 +14,7 @@ def get_premium(options_strategy, options_data):
         return options_data[options_data['STRIKE'] == strike].P_LAST
     return 0
 
-def advice():
+def advice(max_loss):
     options_data = pd.read_pickle(
     'spx_eom_expiry_options_2010_2022.bz2')
     options_data.columns = options_data.columns.str.replace(
@@ -28,8 +28,12 @@ def advice():
     spread = setup_call_spread(options_data_daily, 10)
     spread['position'] = np.where(spread['position'] > 0, 'LONG', 'SHORT')
     spread['expiration'] = '30d'
-    spread = spread[['position','Option Type','Strike Price','premium','expiration']]
+    loss = spread[spread['position']=='LONG']['premium'][0] - spread[spread['position']=='SHORT']['premium'][0]
+    size = max_loss//loss
+    spread['Size'] = int(size)
+    spread = spread[['Size','position','Option Type','Strike Price','premium','expiration']]
     return spx.loc[last_day]['Adj Close'],spread
+
 def setup_call_spread(options_data, strike_difference=10):
     if options_data is None:
         pass

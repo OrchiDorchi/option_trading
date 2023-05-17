@@ -5,6 +5,7 @@ import plotly.express as px
 import pickle
 from backtest import backtest
 from ml_options_util_quantra import advice
+from Option import visualize_options,Call,Put
 
 st.set_page_config(page_title='Riskoptima Options', layout="centered")
 data = pd.read_csv('spx.csv')
@@ -17,9 +18,6 @@ line_graph= px.line(data['Adj Close'],title='Daily close Price of SPX')
 st.header('ML Model for Bull Call Spread Trading')
 
 st.plotly_chart(line_graph)
-
-
-
 analytics = None
 
 col1,col2 = st.columns([2,1])
@@ -37,7 +35,7 @@ hide_table_row_index = """
             </style>
             """
 with col1:
-    take_profit = st.number_input('How much money are you willing to invest?(USD)',value=5000,format='%d')
+    initial_equity = st.number_input('How much money are you willing to invest?(USD)',value=5000,format='%d')
 
 max_risk = st.radio(
     "What is the maximum percent of your investment you would accept losing?",
@@ -64,13 +62,18 @@ with col3:
         temp=True
 with col3:      
     if st.button('Give Advice'):
-        last_close, spread = advice()
+        max_loss = initial_equity * float(max_risk.strip('%')) / 100
+        last_close, spread = advice(max_loss)
 
 if spread is not None:
     st.write('Last days close is ${:.2f}'.format(last_close))
-    st.table(spread)
-if temp:
     st.markdown(hide_table_row_index, unsafe_allow_html=True)
+    st.table(spread)
+    call1 = Call(last_close,spread.iloc[0]['Strike Price'],30,spread.iloc[0]['premium'],'purchase')
+    call2 = Call(last_close,spread.iloc[1]['Strike Price'],30,spread.iloc[1]['premium'],'write')
+    st.subheader('Potential')
+    visualize_options([call1,call2],spread.iloc[0]['Size'],3750,4000)
+if temp:
     analytics,round_trips_details,trades,trade_analytics = backtest()
 
 if analytics is not None:
@@ -78,6 +81,13 @@ if analytics is not None:
     st.plotly_chart(analytics_graph)
 
     st.subheader('Backtesting Results')
+    hide_dataframe_row_index = """
+            <style>
+            .row_heading.level0 {display:none}
+            .blank {display:none}
+            </style>
+            """
+    st.markdown(hide_dataframe_row_index, unsafe_allow_html=True)
     st.dataframe(round_trips_details)
     st.subheader('Spread Strategy Total')
     st.dataframe(trades)
