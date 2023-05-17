@@ -13,9 +13,11 @@ from ml_options_util_quantra import get_premium, setup_call_spread
 def add_to_mtm(mark_to_market, option_strategy, trading_date):
     option_strategy['Date'] = trading_date
     mark_to_market = pd.concat([mark_to_market, option_strategy])
+    # print('='*30)
+    # print(mark_to_market)
     return mark_to_market
 
-def backtest():
+def backtest(initial_equity=5_000,max_loss=100):
     options_data = pd.read_pickle(
     'spx_eom_expiry_options_2010_2022.bz2')
     options_data.columns = options_data.columns.str.replace(
@@ -51,11 +53,11 @@ def backtest():
 
             if data.loc[i, 'signal'] == 1:
                 spread = setup_call_spread(options_data_daily, 10)
-
+                # print(spread)
             else:
                 continue
 
-            if (spread.premium.isna().sum() > 0) or ((spread.premium == 0).sum() > 0):
+            if (spread['premium'].isna().sum() > 0) or ((spread['premium'] == 0).sum() > 0):
                 # print(
                 #     f"\x1b[31mStrike price not liquid so we will ignore this trading opportunity {i}\x1b[0m")
                 continue
@@ -64,7 +66,7 @@ def backtest():
             trades['entry_date'] = i
             trades.rename(columns={'premium': 'entry_price'}, inplace=True)
 
-            net_premium = round((spread.position * spread.premium).sum(), 1)
+            net_premium = round((spread['position'] * spread['premium']).sum(), 1)
 
             premium_sign = np.sign(net_premium)
             sl = net_premium * \
@@ -130,8 +132,7 @@ def backtest():
 
                 current_position = 0
                 exit_flag = False
-    mark_to_market['net_premium'] = mark_to_market.position * \
-    mark_to_market.premium
+    mark_to_market['net_premium'] = mark_to_market.position * mark_to_market.premium
 
     # Strategy analytics
     analytics = pd.DataFrame()
@@ -149,7 +150,7 @@ def backtest():
     (round_trips_details['exit_price']-round_trips_details['entry_price'])
 
 
-    lot_size=100
+    lot_size=1
     trades = pd.DataFrame()
     trades_group = round_trips_details.groupby('entry_date')
     trades['Entry_Date'] = trades_group['entry_date'].first()
@@ -157,8 +158,8 @@ def backtest():
     trades['Exit_Type'] = trades_group['exit_type'].first()
     trades['PnL'] = trades_group.pnl.sum() * lot_size
 
-    trades['Turnover'] = (trades_group['exit_price'].sum() +
-                        trades_group['entry_price'].sum()) * lot_size
+    # trades['Turnover'] = (trades_group['exit_price'].sum() +
+    #                     trades_group['entry_price'].sum()) * lot_size
     trades.reset_index(inplace=True)
     trades.drop(['entry_date'],axis=1,inplace=True)
 
@@ -178,6 +179,10 @@ def backtest():
         trades.loc[trades.PnL < 0].PnL.mean())
     trade_analytics['Profit Factor'] = (trade_analytics['Win_Percentage']*trade_analytics['per_trade_profit_winners']) / \
     (trade_analytics['Loss_Percentage']*trade_analytics['per_trade_loss_losers'])
+    
+    
     round_trips_details['position'] = np.where(round_trips_details['position'] > 0, 'LONG', 'SHORT')
     round_trips_details = round_trips_details.set_index('position')
     return analytics,round_trips_details,trades,trade_analytics
+if __name__ =='__main__':
+    backtest()

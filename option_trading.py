@@ -12,7 +12,7 @@ st.set_page_config(page_title='Riskoptima Options', layout="centered")
 done_backtest = False
 analytics = None
 spread = None
-
+equity_graph = None
 
 data = pd.read_csv('spx.csv')
 vot_soft = pickle.load(open('vot_soft.pickle', "rb"))
@@ -79,9 +79,11 @@ if done_backtest:
     analytics,round_trips_details,trades,trade_analytics = backtest()
 
 if analytics is not None:
-    analytics_graph= px.line(analytics['Cumulative PnL'],)
+    analytics = analytics.rename(columns={"Cumulative PnL": "Equity"})
+    analytics_graph= px.line(analytics['Equity']+initial_equity,)
+    pf.timeseries.show_perf_stats(analytics['Equity'])
+    # print(analytics)
     st.plotly_chart(analytics_graph)
-
     st.subheader('Backtesting Results')
     st.dataframe(round_trips_details)
     st.subheader('Spread Strategy Total')
