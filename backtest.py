@@ -23,8 +23,8 @@ def backtest():
     data = pd.read_csv('spy_signals_2018_2022.csv', index_col=0)
     data['signal'] = data['predicted_signal']
     config = {
-    'stop_loss_percentage': 40,
-    'take_profit_percentage': 40,
+    'stop_loss_percentage': 1000,
+    'take_profit_percentage': 1000,
     'days_to_exit_before_expiry': 1
     }
     round_trips_details = pd.DataFrame()
@@ -39,7 +39,6 @@ def backtest():
     start_date = data.index[0]
     day_index = 0
     max_day = data.shape[0]
-    ph =st.empty()
     completion_bar = st.progress(0,'Running Backtest...')
     for i in data.loc[start_date:].index:
         completion_bar.progress(day_index/max_day,'Backtest running...')
