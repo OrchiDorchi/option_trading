@@ -81,8 +81,7 @@ if done_backtest:
 if analytics is not None:
     analytics = analytics.rename(columns={"Cumulative PnL": "Equity"})
     analytics_graph= px.line(analytics['Equity']+initial_equity,)
-    pf.timeseries.show_perf_stats(analytics['Equity'])
-    # print(analytics)
+    # analytics.to_csv('analytics.csv')
     st.plotly_chart(analytics_graph)
     st.subheader('Backtesting Results')
     st.dataframe(round_trips_details)
