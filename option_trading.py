@@ -6,6 +6,7 @@ import pickle
 from backtest import backtest
 from ml_options_util_quantra import advice
 from Option import visualize_options,Call,Put
+from portfolio_analytics import total_return,volatility,sharpe,annualized_return,drawdowns,sortino
 
 st.set_page_config(page_title='Riskoptima Options', layout="centered")
 
@@ -44,7 +45,7 @@ with col1:
 
 max_risk = st.radio(
     "What is the maximum percent of your investment you would accept losing?",
-    ('5%', '10%', '15%','20%','30%','50%','100%'),horizontal=True,index=6)
+    ('5%', '10%', '15%','20%','30%','50%','100%'),horizontal=True,index=4)
 min_roi = st.radio(
     "What is the minimum ROI (return on investment) you are willing to make?",
     ('5%', '10%', '15%','20%','30%','50%','100%','200%'),horizontal=True,index=3)
@@ -78,15 +79,42 @@ if done_backtest:
 
 if analytics is not None:
     analytics = analytics.rename(columns={"Cumulative PnL": "Equity"})
-    analytics_graph= px.line(analytics['Equity'],)
+    analytics_graph= px.line(analytics['Equity'],title='Equity')
+
+    total_r = total_return(analytics['Equity'])
+    total_r = '{:.2f}%'.format(100* total_r)
+    annualized_r = annualized_return(analytics['Equity'])
+    annualized_r = '{:.2f}%'.format(100 * annualized_r)
+    drawdowns_ = drawdowns(analytics['Equity'])
+    max_drawdown = '{:.2f}%'.format(drawdowns_[-1])
+    volatility_ = volatility(analytics['Equity'])
+    volatility_ = '{:.5f}'.format(volatility_)
+    sharpe_ = sharpe(analytics['Equity'])
+    sharpe_ = '{:.2f}'.format(sharpe_)
+    sortino_ = sortino(analytics['Equity'])
+    sortino_ = '{:.2f}'.format(sortino_)
+
+
+
+    portfolio_analytics = pd.DataFrame(columns=['Value'])
+    portfolio_analytics = portfolio_analytics.append(pd.Series({'Value':total_r},name='Total Return'))
+    portfolio_analytics = portfolio_analytics.append(pd.Series({'Value':annualized_r},name='Annualized Return'))
+    portfolio_analytics = portfolio_analytics.append(pd.Series({'Value':volatility_},name='Volatility'))
+    portfolio_analytics = portfolio_analytics.append(pd.Series({'Value':sharpe_},name='Sharpe Ratio'))
+    portfolio_analytics = portfolio_analytics.append(pd.Series({'Value':sortino_},name='Sortino Ratio'))
+    portfolio_analytics = portfolio_analytics.append(pd.Series({'Value':max_drawdown},name='Max. Drawdown'))
+
     # analytics.to_csv('analytics.csv')
     st.plotly_chart(analytics_graph)
     st.subheader('Backtesting Results')
     st.dataframe(round_trips_details)
-    st.subheader('Spread Strategy Total')
+    st.subheader('Spread Strategy Total PnLs')
     st.dataframe(trades)
     st.subheader('Trade Analytics')
     st.dataframe(trade_analytics.T)
     st.subheader('Portfolio Analytics')
-
+    st.dataframe(portfolio_analytics)
+    drawdown_graph= px.line(y=drawdowns_,x=analytics.index,title='Maximum Drawdown')
+    drawdown_graph.update_layout(xaxis_title='Date',yaxis_title='Value')
+    st.plotly_chart(drawdown_graph)
 
