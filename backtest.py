@@ -17,7 +17,7 @@ def add_to_mtm(mark_to_market, option_strategy, trading_date):
     # print(mark_to_market)
     return mark_to_market
 
-def backtest(initial_equity=5_000,max_loss=25):
+def backtest(initial_equity=5_000,max_loss=25,commision=1):
     options_data = pd.read_pickle(
     'spx_eom_expiry_options_2010_2022.bz2')
     options_data.columns = options_data.columns.str.replace(
@@ -122,7 +122,7 @@ def backtest(initial_equity=5_000,max_loss=25):
                 round_trips_details = pd.concat([round_trips_details, trades])
                 net_premium = round((spread.position * spread.premium).sum(), 1)
                 entry_net_premium = (trades.position * trades.entry_price).sum()
-                trade_pnl = round(net_premium - entry_net_premium, 1)
+                trade_pnl = round(net_premium - entry_net_premium, 1) - commision
 
                 cum_pnl += trade_pnl
                 cum_pnl = round(cum_pnl, 1)
