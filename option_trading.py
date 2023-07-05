@@ -20,7 +20,7 @@ data = data.set_index('Date')
 data = data[:-1]
 
 
-st.header('AI Model for Bull Call Spread Trading')
+st.header('AI Model for Bull Call Spread Trading Commisioned')
 
 line_graph= px.line(data['Adj Close'],title='Daily close Price of SPX')
 st.plotly_chart(line_graph)
