@@ -45,10 +45,10 @@ with col1:
 
 max_risk = st.radio(
     "What is the maximum percent of your investment you would accept losing?",
-    ('5%', '10%', '15%','20%','30%','50%','100%'),horizontal=True,index=4)
-min_roi = st.radio(
-    "What is the minimum ROI (return on investment) you are willing to make?",
-    ('5%', '10%', '15%','20%','30%','50%','100%','200%'),horizontal=True,index=3)
+    ('5%', '10%', '15%','20%','30%',),horizontal=True,index=4)
+# min_roi = st.radio(
+#     "What is the minimum ROI (return on investment) you are willing to make?",
+#     ('5%', '10%', '15%','20%','30%','50%','100%','200%'),horizontal=True,index=3)
 col1, col2, col3, col4, col5 = st.columns(5)
 
 # col1, col2, col3 = st.columns(3)
